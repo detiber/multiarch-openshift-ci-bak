@@ -45,47 +45,47 @@ node("paas-sig-ci-slave01") {
                   branches: [[name:'*/${ORIGIN_BRANCH}']],
                   doGenerateSubmoduleConfigurations: false,
                   extensions: [
-		    [$class: 'RelativeTargetDirectory', relativeTargetDir:'origin'],
-		    [$class: 'CleanBeforeCheckout']
-		  ],
+                    [$class: 'RelativeTargetDirectory', relativeTargetDir:'origin'],
+                    [$class: 'CleanBeforeCheckout']
+                  ],
                   gitTool: 'Default',
                   submoduleCfg: [],
                   userRemoteConfigs: [[url:'${ORIGIN_REPO}']]]
           )
           sh('''#!/usr/bin/bash -xeu
-	        pushd origin
-		git remote add detiber https://github.com/detiber/origin.git || true
-		git fetch detiber
-		git merge detiber/multiarch
-		popd
-	  ''')
-	}
+                pushd origin
+                git remote add detiber https://github.com/detiber/origin.git || true
+                git fetch detiber
+                git merge detiber/multiarch
+                popd
+             ''')
+        }
         withCiHost {
-	  stage('prep') {
+          stage('prep') {
             remoteCommands([
-  	      "yum install -y rsync docker",
+              "yum install -y rsync docker git",
               "echo 'insecure_registries: [172.30.0.0/16]' >> /etc/containers/registries.conf",
               "systemctl enable docker",
               "systemctl start docker"
-  	    ])
-	    remoteSync(['origin'])
-	  }
-	  stage('check') {
-	    try {
+            ])
+            remoteSync(['origin'])
+          }
+          stage('check') {
+            try {
               remoteCommands([
                 "cd origin; OS_BUILD_ENV_IMAGE=${OS_BUILD_ENV_IMAGE} hack/env TEST_KUBE=true JUNIT_REPORT=true DETECT_RACES=false TIMEOUT=300s make check -j -k"
-	      ])
-	    }
+              ])
+            }
             catch (exc) {
-	      throw exc
-	    }
-	    finally {
+              throw exc
+            }
+            finally {
               fetchScriptOutput()
-	      archiveArtifacts 'origin/_output/scripts/**/*'
-	      junit 'origin/_output/scripts/**/*.xml'
-	    }
+              archiveArtifacts 'origin/_output/scripts/**/*'
+              junit 'origin/_output/scripts/**/*.xml'
+            }
           }
-	}
+        }
       }
     }
   }
