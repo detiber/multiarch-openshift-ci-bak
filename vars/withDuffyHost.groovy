@@ -19,7 +19,7 @@ def call(Closure body) {
             cico inventory --ssid ${ssid} -f json > duffy.inventory
             cp duffy.hostname test.hostname
             ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@$(cat test.hostname) 'echo "Defaults:root !requiretty" > /etc/sudoers.d/00-root-no-requiretty'
-            cat /etc/sudoers.d/00-root-no-requiretty
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@$(cat test.hostname) cat /etc/sudoers.d/00-root-no-requiretty
          ''')
       stash name: 'duffy-results', includes: 'duffy.*'
       stash name: 'test.hostname', includes: 'test.hostname'
