@@ -16,7 +16,7 @@ ${cmd}
 SCRIPT
               chmod +x "${script}"
               scp ${ssh_opts} "${script}" root@${test_hostname}:"${script}"
-              ssh -t ${ssh_opts} root@${test_hostname} "bash -l -c \"timeout 14400 ${script}\""
+              ssh ${ssh_opts} root@${test_hostname} "bash -l -c \"timeout 14400 ${script}\""
            ''')
       }
     }
