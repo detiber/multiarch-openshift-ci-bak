@@ -3,9 +3,9 @@ def call(Closure body) {
     stage("${PROVISION_STAGE_NAME}"){
       sh('''#!/usr/bin/bash -xeu
             if [[ "${ARCH}" == "x86_64" ]]; then
-              ssid=$(cico node get -f value -c comment)
+              ssid=$(cico node get -f value -c comment --retry-count 60 --retry-interval 60)
             else
-              ssid=$(cico node get -f value -c comment --arch "${ARCH}" --flavor xram.medium )
+              ssid=$(cico node get -f value -c comment --arch "${ARCH}" --flavor xram.medium --retry-count 60 --retry-interval 60)
             fi
             if [[ -z "${ssid:-}" ]]; then
               echo "Failed to provision duffy host"
@@ -20,6 +20,7 @@ def call(Closure body) {
             cp duffy.hostname test.hostname
             ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@$(cat test.hostname) 'echo "Defaults:root !requiretty" > /etc/sudoers.d/00-root-no-requiretty'
             ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@$(cat test.hostname) cat /etc/sudoers.d/00-root-no-requiretty
+            ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@$(cat test.hostname) mount -t tmpfs tmpfs /tmp
          ''')
       stash name: 'duffy-results', includes: 'duffy.*'
       stash name: 'test.hostname', includes: 'test.hostname'
