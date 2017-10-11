@@ -111,7 +111,6 @@ node("paas-sig-ci-slave01") {
           }
           catch (exc) {
             failed_stages += 'build release'
-	    throw exc
           }
           try {
             stage('integration') {
